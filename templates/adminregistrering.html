@@ -1,0 +1,15 @@
+{% extends "adminbase.html" %}
+
+{% block content %}
+  <h1>Registrer ny admin</h1>
+  <form action="{{ url_for('admin_register') }}" method="POST">
+    <label for="adminid">AdminId:</label>
+    <input type="text" id="adminid" name="adminid" required><br><br>
+    <label for="fornavn">Fornavn:</label>
+    <input type="text" id="fornavn" name="fornavn" required><br><br>
+    <label for="etternavn">Etternavn:</label>
+    <input type="text" id="etternavn" name="etternavn" required><br><br>
+    <input type="submit" value="Registrer">
+  </form>
+  Allerede registrert? <a href="adminlogin">Logg inn!</a>
+{% endblock %}

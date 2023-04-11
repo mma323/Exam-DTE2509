@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}Admin Area{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='adminbase.css') }}">
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <header>
+      <nav>
+        <ul>
+          <li><a href="#">Admin dashbord</a></li>
+          <li><a href="#">Brukere</a></li>
+          <li><a href="#">Quizzer</a></li>
+          <li><a href="#">Spørsmål</a></li>
+          <li><a href="#">Svar</a></li>
+          <li><a href="#">Logg ut</a></li>
+        </ul>
+      </nav>
+    </header>
+    <main>
+      {% block content %}
+      
+      {% endblock %}
+    </main>
+    <footer>
+      <p>Web basert Quiz - Utviklet i emnet DTE2509 ved UiT, våren 2023 </p>
+    </footer>
+  </body>
+</html>

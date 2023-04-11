@@ -1,0 +1,13 @@
+{% extends "adminbase.html" %}
+
+{% block content %}
+  <h1>Admin Login</h1>
+  <form method="POST" action="{{ url_for('admin_login') }}">
+    <div class="form-group">
+      <label for="admin_id">AdminId: </label>
+      <input type="text" class="form-control" id="admin_id" name="admin_id" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+  </form>
+  Ikke registrert? <a href="adminregistrering">Registrer deg nå!</a>
+{% endblock %}
