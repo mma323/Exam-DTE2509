@@ -28,6 +28,11 @@ class Database:
         return result
     
 
+    def insert(self, sql):
+        self.cursor.execute(sql)
+        self.conn.commit()
+
+
     def get_admin(self, admin_id):
         admin = self.query(
             f"SELECT * FROM Admin WHERE idAdmin = '{admin_id}'"

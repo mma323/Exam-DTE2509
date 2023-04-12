@@ -57,8 +57,21 @@ def admin_dashboard():
         return redirect(url_for('admin_login'))
 
 
-@app.route("/adminregistrering")
+@app.route("/adminregistrering", methods=["GET", "POST"])
 def admin_register():
+    if request.method == "POST":
+        admin_id = "admin_" + request.form.get("admin_id")
+        admin_fornavn = request.form.get("fornavn")
+        admin_etternavn = request.form.get("etternavn")
+        with Database() as database:
+            database.insert(
+                f"""
+                INSERT INTO Admin (idAdmin, fornavn, etternavn) 
+                VALUES ('{admin_id}', '{admin_fornavn}', '{admin_etternavn}')
+                """
+            )
+        return redirect(url_for('admin_login'))
+    
     return render_template("adminregistrering.html")
 
 
