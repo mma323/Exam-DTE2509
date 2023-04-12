@@ -13,41 +13,19 @@ app = Flask(__name__,
 app.secret_key = os.urandom(24)
 
 
-bruker_login_manager = LoginManager()
-bruker_login_manager.login_view = 'bruker_login'
-bruker_login_manager.init_app(app)
-
-admin_login_manager = LoginManager()
-admin_login_manager.login_view = 'admin_login'
-admin_login_manager.init_app(app)
+login_manager = LoginManager(app)
+login_manager.init_app(app)
 
 
-@admin_login_manager.user_loader
-def load_admin(admin_id):
+@login_manager.user_loader
+def load_user(id, user_type="admin"):
     with Database() as database:
-        admin = Admin( *database.get_admin(admin_id)[0] )
-    return admin
-
-
-@bruker_login_manager.user_loader
-def load_bruker(bruker_id):
-    with Database() as database:
-        bruker = Bruker( *database.get_bruker(bruker_id)[0] )
-    return bruker
-
-
-@admin_login_manager.user_loader
-def load_admin(admin_id):
-    with Database() as database:
-        admin = Admin( *database.get_admin(admin_id)[0] )
-    return admin
-
-
-@bruker_login_manager.user_loader
-def load_bruker(bruker_id):
-    with Database() as database:
-        bruker = Bruker( *database.get_bruker(bruker_id)[0] )
-    return bruker
+        if user_type == "admin":
+            admin = Admin( *database.get_admin(id)[0] )
+            return admin
+        elif user_type == "bruker":
+            bruker = Bruker( *database.get_bruker(id)[0] )
+            return bruker
 
 
 @app.route("/")
@@ -59,7 +37,7 @@ def start():
 def admin_login():
     if request.method == "POST":
         admin_id = request.form.get("admin_id")
-        admin = load_admin(admin_id)
+        admin = load_user(admin_id, "admin")
         if admin is not None:
             login_user(admin)
             return redirect( url_for("admin_dashboard") )
@@ -85,7 +63,7 @@ def admin_register():
 def bruker_login():
     if request.method == "POST":
         bruker_id = request.form.get("bruker_id")
-        bruker = load_bruker(bruker_id)
+        bruker = load_user(bruker_id, "bruker")
         if bruker is not None:
             login_user(bruker)
             return redirect( url_for("bruker_dashboard") )
