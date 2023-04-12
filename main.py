@@ -18,14 +18,15 @@ login_manager.init_app(app)
 
 
 @login_manager.user_loader
-def load_user(id, user_type="admin"):
+def load_user(id):
     with Database() as database:
-        if user_type == "admin":
-            admin = Admin( *database.get_admin(id)[0] )
-            return admin
-        elif user_type == "bruker":
-            bruker = Bruker( *database.get_bruker(id)[0] )
-            return bruker
+        admin = database.get_admin(id)
+        if admin:
+            return Admin(*admin[0]) #Indeks fordi databasen bruker fetchall()
+        bruker = database.get_bruker(id)
+        if bruker:
+            return Bruker(*bruker[0]) #Indeks fordi databasen bruker fetchall()
+    return None
 
 
 @app.route("/")
@@ -36,8 +37,10 @@ def start():
 @app.route("/adminlogin", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
-        admin_id = request.form.get("admin_id")
-        admin = load_user(admin_id, "admin")
+        #Legger til admin_ foran id for å skille mellom bruker og admin i db
+        admin_id = "admin_" + request.form.get("admin_id")
+        print(admin_id)
+        admin = load_user(admin_id)
         if admin is not None:
             login_user(admin)
             return redirect( url_for("admin_dashboard") )
@@ -62,8 +65,9 @@ def admin_register():
 @app.route("/brukerlogin", methods=["GET", "POST"])
 def bruker_login():
     if request.method == "POST":
-        bruker_id = request.form.get("bruker_id")
-        bruker = load_user(bruker_id, "bruker")
+        #Legger til bruker_ foran id for å skille mellom bruker og admin i db
+        bruker_id = "bruker_" + request.form.get("bruker_id")
+        bruker = load_user(bruker_id)
         if bruker is not None:
             login_user(bruker)
             return redirect( url_for("bruker_dashboard") )

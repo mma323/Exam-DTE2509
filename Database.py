@@ -30,13 +30,13 @@ class Database:
 
     def get_admin(self, admin_id):
         admin = self.query(
-            f"SELECT * FROM Admin WHERE idAdmin = {admin_id}"
+            f"SELECT * FROM Admin WHERE idAdmin = '{admin_id}'"
         )
         return admin
-    
+        
 
     def get_bruker(self, bruker_id):
         bruker = self.query(
-            f"SELECT * FROM Bruker WHERE idBruker = {bruker_id}"
+            f"SELECT * FROM Bruker WHERE idBruker = '{bruker_id}'"
         )
         return bruker
