@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from flask_login import LoginManager, login_required, login_user, current_user
+from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from Database import Database
 from Admin import Admin
 from Bruker import Bruker
@@ -14,6 +14,7 @@ app.secret_key = os.urandom(24)
 
 
 login_manager = LoginManager(app)
+login_manager.login_view = "start" #Ønsket side ved login_required
 login_manager.init_app(app)
 
 
@@ -21,9 +22,11 @@ login_manager.init_app(app)
 def load_user(id):
     with Database() as database:
         admin = database.get_admin(id)
+        #Vil kun finnes i admintabellen hvis admin_ er prefiks
         if admin:
             return Admin(*admin[0]) #Indeks fordi databasen bruker fetchall()
         bruker = database.get_bruker(id)
+        #Vil kun finnes i brukertabellen hvis bruker_ er prefiks
         if bruker:
             return Bruker(*bruker[0]) #Indeks fordi databasen bruker fetchall()
     return None
@@ -37,7 +40,7 @@ def start():
 @app.route("/adminlogin", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
-        #Legger til admin_ foran id for å skille mellom bruker og admin i db
+        #Legger til admin_ foran id for å skille mellom bruker og admin
         admin_id = "admin_" + request.form.get("admin_id")
         print(admin_id)
         admin = load_user(admin_id)
@@ -78,7 +81,7 @@ def admin_register():
 @app.route("/brukerlogin", methods=["GET", "POST"])
 def bruker_login():
     if request.method == "POST":
-        #Legger til bruker_ foran id for å skille mellom bruker og admin i db
+        #Legger til bruker_ foran id for å skille mellom bruker og admin
         bruker_id = "bruker_" + request.form.get("bruker_id")
         bruker = load_user(bruker_id)
         if bruker is not None:
@@ -97,9 +100,24 @@ def bruker_dashboard():
         return redirect(url_for('bruker_login'))
     
 
-@app.route("/brukerregistrering")
+@app.route("/brukerregistrering", methods=["GET", "POST"])
 def bruker_register():
+    if request.method == "POST":
+        bruker_id = "bruker_" + request.form.get("bruker_id")
+        with Database() as database:
+            database.insert(
+                f"INSERT INTO Bruker (idBruker) VALUES ('{bruker_id}')"
+            )
+        return redirect(url_for('bruker_login'))
+    
     return render_template("brukerregistrering.html")
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('start'))
 
 
 if __name__ == "__main__":

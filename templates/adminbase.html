@@ -17,7 +17,9 @@
           <li><a href="#">Quizzer</a></li>
           <li><a href="#">Spørsmål</a></li>
           <li><a href="#">Svar</a></li>
-          <li><a href="#">Logg ut</a></li>
+          {% if current_user.is_authenticated %}
+          <li><a href="/logout">Logg ut</a></li>
+          {% endif %}
         </ul>
       </nav>
     </header>

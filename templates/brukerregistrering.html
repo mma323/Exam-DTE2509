@@ -2,10 +2,10 @@
 
 {% block content %}
   <h1>Brukerregistrering</h1>
-  <form method="POST" action="{{ url_for('admin_login') }}">
+  <form method="POST" action="{{ url_for('bruker_register') }}">
     <div class="form-group">
-      <label for="username">BrukerId: </label>
-      <input type="text" class="form-control" id="username" name="username" required>
+      <label for="bruker_id">BrukerId: </label>
+      <input type="text" class="form-control" id="bruker_id" name="bruker_id" required>
     </div>
     <button type="submit" class="btn btn-primary">Registrer</button>
   </form>

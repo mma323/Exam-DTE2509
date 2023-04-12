@@ -13,7 +13,9 @@
       <nav>
         <ul>
           <li><a href="#">Web basert Quiz</a></li>
-
+          {% if current_user.is_authenticated %}
+          <li><a href="/logout">Logg ut</a></li>
+          {% endif %}
         </ul>
       </nav>
     </header>
