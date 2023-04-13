@@ -147,5 +147,28 @@ def quiz_oversikt():
     return render_template("quizzer.html", quizzes=quizzer)
 
 
+@app.route("/quiz/create", methods=["GET", "POST"])
+@login_required
+def quiz_create():
+    if request.method == "POST":
+        quiz_navn = request.form.get("quiz_navn")
+        with Database() as database:
+            database.insert(
+                f"INSERT INTO Quiz (navn) VALUES ('{quiz_navn}')"
+            )
+        return redirect(url_for('quiz_oversikt'))
+
+
+@app.route("/quiz/delete", methods=["GET", "POST"])
+@login_required
+def quiz_delete():
+    if request.method == "POST":
+        quiz_id = request.form.get("quiz")
+        with Database() as database:
+            database.insert(
+                f"DELETE FROM Quiz WHERE idQuiz = '{quiz_id}'"
+            )
+        return redirect(url_for('quiz_oversikt'))
+
 if __name__ == "__main__":
     app.run(debug=True)
