@@ -1,5 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for
-from flask_login import LoginManager, login_required, login_user, logout_user, current_user
+from flask import (
+    Flask, render_template, request, redirect, url_for
+)
+from flask_login import (
+    LoginManager, login_required, login_user, logout_user, current_user
+)
 from Database import Database
 from Admin import Admin
 from Bruker import Bruker
@@ -118,6 +122,29 @@ def bruker_register():
 def logout():
     logout_user()
     return redirect(url_for('start'))
+
+
+@app.route("/quizzer", methods=["GET", "POST"])
+@login_required
+def quiz_oversikt():
+    with Database() as database:
+        quizzer = database.get_quizzer()
+        sporsmal_liste = database.get_sporsmal()
+        
+        for quiz in quizzer:
+            for sporsmal in sporsmal_liste:
+                if quiz.id_quiz == sporsmal.id_quiz:
+                    quiz.sporsmal.append(sporsmal)
+
+        svar_liste = database.get_svar()
+        for svar in svar_liste:
+            for sporsmal in sporsmal_liste:
+                if (
+                    (svar.id_sporsmal == sporsmal.id_sporsmal) and 
+                    (svar.id_quiz == sporsmal.id_quiz)
+                ):  
+                    sporsmal.svar.append(svar)  
+    return render_template("quizzer.html", quizzes=quizzer)
 
 
 if __name__ == "__main__":

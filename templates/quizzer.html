@@ -1,0 +1,72 @@
+{% extends "adminbase.html" %}
+
+{% block content %}
+<h1>Administrer quizzer</h1>
+<hr>
+
+<h2>Lag en ny quiz</h2>
+<form action="/quiz/create" method="POST">
+    <label for="quiz_name">Navn på quiz:</label>
+    <input type="text" id="quiz_name" name="quiz_name" required><br><br>
+    <input type="submit" value="Legg til Quiz">
+</form>
+<hr>
+
+<h2>Slett en quiz</h2>
+{% if quizzes %}
+<form action="/quiz/delete" method="POST">
+    <label for="quiz">Velg hvilken quiz som skal slettes:</label>
+    <select id="quiz" name="quiz">
+        {% for quiz in quizzes %}
+        <option value="{{ quiz.id_quiz }}">{{ quiz.navn }}</option>
+        {% endfor %}
+    </select><br><br>
+    <input type="submit" value="Slett valgt Quiz">
+</form>
+{% else %}
+<p>Ingen quizzer funnet</p>
+{% endif %}
+<hr>
+
+{% if quizzes %}
+{% for quiz in quizzes %}
+<h2>Spørsmål i {{ quiz.navn }}</h2>
+<form action="/quiz/{{ quiz.id_quiz }}/sporsmal/create" method="POST">
+    <label for="sporsmal_text">Spørsmål:</label>
+    <input type="text" id="sporsmal_text" name="sporsmal_text" required><br><br>
+    <label for="svar1">Svar 1:</label>
+    <input type="text" id="svar1" name="svar1" required>
+    <input type="radio" id="riktig1" name="riktig_svar" value="1" required>
+    <label for="riktig1">Riktig svar</label><br>
+    <label for="svar2">Svar 2:</label>
+    <input type="text" id="svar2" name="svar2" required>
+    <input type="radio" id="riktig2" name="riktig_svar" value="2" required>
+    <label for="riktig2">Riktig svar</label><br>
+    <label for="svar3">Svar 3:</label>
+    <input type="text" id="svar3" name="svar3" required>
+    <input type="radio" id="riktig3" name="riktig_svar" value="3" required>
+    <label for="riktig3">Riktig svar</label><br>
+    <label for="svar4">Svar 4:</label>
+    <input type="text" id="svar4" name="svar4" required>
+    <input type="radio" id="riktig4" name="riktig_svar" value="4" required>
+    <label for="riktig4">Riktig svar</label><br><br>
+    <input type="submit" value="Legg til spørsmål i {{quiz.navn}}">
+</form>
+{% if quiz.sporsmal %}
+<h3>Spørsmål:</h3>
+<ul>
+    {% for sporsmal in quiz.sporsmal %}
+    <li>{{ sporsmal.tekst }}</li>
+    <ul>
+        {% for svar in sporsmal.svar %}
+        <li {% if svar.is_riktig %}style="color:green; font-weight:bold;"{% endif %}>{{ svar.tekst }}</li>
+            {% endfor %}
+    </ul>
+    {% endfor %}
+</ul>
+{% else %}
+<p>Ingen spørsmål funnet i denne quizzen</p>
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endblock %}

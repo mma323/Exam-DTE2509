@@ -1,4 +1,7 @@
 import mysql.connector
+from Quiz import Quiz
+from Sporsmal import Sporsmal
+from Svar import Svar
 
 class Database:
 
@@ -45,3 +48,29 @@ class Database:
             f"SELECT * FROM Bruker WHERE idBruker = '{bruker_id}'"
         )
         return bruker
+    
+
+    def get_quizzer(self):
+        quizzer = self.query(
+            f"SELECT * FROM Quiz"
+        )
+        quizzer = [Quiz(*quiz) for quiz in quizzer]
+
+        return quizzer
+    
+
+    def get_sporsmal(self):
+        sporsmal = self.query(
+            f"SELECT * FROM Sporsmal"
+        )
+        sporsmal = [Sporsmal(*sporsmal) for sporsmal in sporsmal]
+
+        return sporsmal
+    
+
+    def get_svar(self):
+        svar = self.query(
+            f"SELECT * FROM Svar"
+        )
+        svar = [Svar(*svar) for svar in svar]
+        return svar
