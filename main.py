@@ -14,6 +14,7 @@ app = Flask(__name__,
     static_folder='static',
     template_folder='templates')
 
+
 app.secret_key = os.urandom(24)
 
 
@@ -129,6 +130,7 @@ def logout():
 def quiz_oversikt():
     with Database() as database:
         quizzer = database.get_quizzer()
+        quizzer.reverse() #Reverserer for å få nyeste øverst
         sporsmal_liste = database.get_sporsmal()
         
         for quiz in quizzer:
@@ -169,6 +171,7 @@ def quiz_delete():
                 f"DELETE FROM Quiz WHERE idQuiz = '{quiz_id}'"
             )
         return redirect(url_for('quiz_oversikt'))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
