@@ -3,4 +3,6 @@ class Quiz:
         self.id_quiz = id_quiz
         self.navn = navn
         self.sporsmal = []
-        self.antall_sporsmal = len(self.sporsmal)
+    
+    def get_antall_sporsmal(self):
+        return len(self.sporsmal)

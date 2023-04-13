@@ -187,6 +187,7 @@ def sporsmal_create():
         sporsmal_id = request.form.get("sporsmal_nummer")
         sporsmal_tekst = request.form.get("sporsmal_tekst")
         with Database() as database:
+            
             database.insert(
                 f"""
                 INSERT INTO Sporsmal (Quiz_idQuiz, idSporsmal, Tekst, Tema_idTema) 
