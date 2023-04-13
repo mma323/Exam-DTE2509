@@ -187,7 +187,7 @@ def sporsmal_create():
         sporsmal_id = request.form.get("sporsmal_nummer")
         sporsmal_tekst = request.form.get("sporsmal_tekst")
         with Database() as database:
-            
+
             database.insert(
                 f"""
                 INSERT INTO Sporsmal (Quiz_idQuiz, idSporsmal, Tekst, Tema_idTema) 
@@ -199,8 +199,20 @@ def sporsmal_create():
             for index, svar in enumerate(svar):
                 database.insert(
                     f"""
-                    INSERT INTO Svar (Sporsmal_Quiz_idQuiz, Sporsmal_idSporsmal, idSvar, Tekst, isRiktig) 
-                    VALUES ('{quiz_id}', '{sporsmal_id}', '{index+1}', '{request.form.get(svar)}', '{1 if svar_riktig == (index) else 0}') 
+                    INSERT INTO Svar (
+                    Sporsmal_Quiz_idQuiz, 
+                    Sporsmal_idSporsmal, 
+                    idSvar, 
+                    Tekst, 
+                    isRiktig
+                    ) 
+                    VALUES (
+                    '{quiz_id}', 
+                    '{sporsmal_id}', 
+                    '{index+1}', 
+                    '{request.form.get(svar)}', 
+                    '{1 if svar_riktig == str(index+1) else 0}' 
+                    ) 
                     """
                 )
 
