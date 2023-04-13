@@ -31,9 +31,12 @@
 {% if quizzes %}
 {% for quiz in quizzes %}
 <h2>Spørsmål i {{ quiz.navn }}</h2>
-<form action="/quiz/{{ quiz.id_quiz }}/sporsmal/create" method="POST">
+<h3>Legg til spørsmål</h3>
+<form action="/quiz/sporsmal/create" method="POST">
+    <input type="hidden" id="quiz_id" name="quiz_id" value="{{ quiz.id_quiz }}">
+    <input type="hidden" id="sporsmal_nummer" name="sporsmal_nummer" value="{{ quiz.antall_sporsmal + 1 }}">
     <label for="sporsmal_text">Spørsmål:</label>
-    <input type="text" id="sporsmal_text" name="sporsmal_text" required><br><br>
+    <input type="text" id="sporsmal_tekst" name="sporsmal_tekst" required><br><br>
     <label for="svar1">Svar 1:</label>
     <input type="text" id="svar1" name="svar1" required>
     <input type="radio" id="riktig1" name="riktig_svar" value="1" required>

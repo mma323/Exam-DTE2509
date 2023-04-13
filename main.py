@@ -170,6 +170,39 @@ def quiz_delete():
             database.insert(
                 f"DELETE FROM Quiz WHERE idQuiz = '{quiz_id}'"
             )
+            database.insert(
+                f"DELETE FROM Sporsmal WHERE idQuiz = '{quiz_id}'"
+            )
+            database.insert(
+                f"DELETE FROM Svar WHERE idQuiz = '{quiz_id}'"
+            )
+        return redirect(url_for('quiz_oversikt'))
+
+
+@app.route("/quiz/sporsmal/create", methods=["GET", "POST"])
+@login_required
+def sporsmal_create():
+    if request.method == "POST":
+        quiz_id = request.form.get("quiz_id")
+        sporsmal_id = request.form.get("sporsmal_nummer")
+        sporsmal_tekst = request.form.get("sporsmal_tekst")
+        with Database() as database:
+            database.insert(
+                f"""
+                INSERT INTO Sporsmal (Quiz_idQuiz, idSporsmal, Tekst, Tema_idTema) 
+                VALUES ('{quiz_id}', '{sporsmal_id}', '{sporsmal_tekst}', '1') 
+                """
+            )
+            svar = ["svar1", "svar2", "svar3", "svar4"]
+            svar_riktig = request.form.get("riktig_svar")
+            for index, svar in enumerate(svar):
+                database.insert(
+                    f"""
+                    INSERT INTO Svar (Sporsmal_Quiz_idQuiz, Sporsmal_idSporsmal, idSvar, Tekst, isRiktig) 
+                    VALUES ('{quiz_id}', '{sporsmal_id}', '{index+1}', '{request.form.get(svar)}', '{1 if svar_riktig == (index) else 0}') 
+                    """
+                )
+
         return redirect(url_for('quiz_oversikt'))
 
 
