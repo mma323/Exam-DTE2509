@@ -177,7 +177,7 @@ def quiz_delete():
                 f"DELETE FROM Svar WHERE idQuiz = '{quiz_id}'"
             )
         return redirect(url_for('quiz_oversikt'))
-
+#Test
 
 @app.route("/quiz/sporsmal/create", methods=["GET", "POST"])
 @login_required
@@ -190,7 +190,9 @@ def sporsmal_create():
 
             database.insert(
                 f"""
-                INSERT INTO Sporsmal (Quiz_idQuiz, idSporsmal, Tekst, Tema_idTema) 
+                INSERT INTO Sporsmal (
+                Quiz_idQuiz, idSporsmal, Tekst, Tema_idTema
+                ) 
                 VALUES ('{quiz_id}', '{sporsmal_id}', '{sporsmal_tekst}', '1') 
                 """
             )
