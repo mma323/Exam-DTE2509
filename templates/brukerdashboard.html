@@ -1,5 +1,11 @@
 {% extends 'brukerbase.html' %}
 
 {% block content %}
-  <h1>Brukerdashboard</h1>
+  {% if quizzer %} 
+    {% for quiz in quizzer %}
+      <a href="#">{{quiz.navn}}</a>
+    {% endfor %}
+  {% else %}
+    <p>Ingen quizzer tilgjengelig</p>
+  {% endif %}
 {% endblock %}

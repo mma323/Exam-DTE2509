@@ -100,7 +100,9 @@ def bruker_login():
 @login_required
 def bruker_dashboard():
     if isinstance(current_user, Bruker):
-        return render_template("brukerdashboard.html")
+        with Database() as database:
+            quizzer = database.get_quizzer()
+        return render_template("brukerdashboard.html", quizzer=quizzer)
     else:
         return redirect(url_for('bruker_login'))
     
@@ -187,7 +189,6 @@ def sporsmal_create():
         sporsmal_id = request.form.get("sporsmal_nummer")
         sporsmal_tekst = request.form.get("sporsmal_tekst")
         with Database() as database:
-
             database.insert(
                 f"""
                 INSERT INTO Sporsmal (
