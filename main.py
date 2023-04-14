@@ -327,7 +327,16 @@ def sporsmal_create():
                 )
 
         return redirect(url_for('quiz_oversikt'))
+    
+@app.route("/quiz/sporsmal/delete/<sporsmal_id>", methods=["GET", "POST"])
+@login_required
+def sporsmal_delete(sporsmal_id):
+    with Database() as database:
+        database.insert(f"DELETE FROM Svar WHERE Sporsmal_idSporsmal = '{sporsmal_id}'")
 
-
+        database.insert(f"DELETE FROM Sporsmal WHERE idSporsmal = '{sporsmal_id}'")
+        
+    return redirect(url_for('quiz_oversikt'))
+   
 if __name__ == "__main__":
     app.run(debug=True)
