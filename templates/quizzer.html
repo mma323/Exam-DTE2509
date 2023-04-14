@@ -34,7 +34,7 @@
 <h3>Legg til spørsmål</h3>
 <form action="/quiz/sporsmal/create" method="POST">
     <input type="hidden" id="quiz_id" name="quiz_id" value="{{ quiz.id_quiz }}">
-    <input type="hidden" id="sporsmal_nummer" name="sporsmal_nummer" value="{{ quiz.get_antall_sporsmal() }}">
+    <input type="hidden" id="sporsmal_nummer" name="sporsmal_nummer" value="{{ quiz.get_antall_sporsmal() + 1}}">
     <label for="sporsmal_text">Spørsmål:</label>
     <input type="text" id="sporsmal_tekst" name="sporsmal_tekst" required><br><br>
     <label for="svar1">Svar 1:</label>
