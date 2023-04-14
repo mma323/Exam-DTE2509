@@ -1,0 +1,21 @@
+{% extends "brukerbase.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ quiz.navn }}</h1>
+    <p>Antall spørsmål: {{ quiz.get_antall_sporsmal() }}</p>
+    <hr>
+    {% for sporsmal in quiz.sporsmal %}
+        <h3>{{ sporsmal.tekst }}</h3>
+        <ul>
+            {% for svar in sporsmal.svar %}
+                    <label>
+                        <input type="radio" name="sporsmal{{ sporsmal.id_sporsmal }}" value="{{ svar.id_svar }}">
+                        {{ svar.tekst }}
+                    </label>
+                    <p></p>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -3,7 +3,8 @@
 {% block content %}
   {% if quizzer %} 
     {% for quiz in quizzer %}
-      <a href="#">{{quiz.navn}}</a>
+      <a href="/quiz/{{quiz.id_quiz}}">{{quiz.navn}}</a>
+      <p></p>
     {% endfor %}
   {% else %}
     <p>Ingen quizzer tilgjengelig</p>

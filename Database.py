@@ -59,6 +59,14 @@ class Database:
         return quizzer
     
 
+    def get_quiz(self, quiz_id):
+        quiz = self.query(
+            f"SELECT * FROM Quiz WHERE idQuiz = {quiz_id}"
+        )
+        quiz = Quiz(*quiz[0])
+        return quiz
+
+
     def get_sporsmal(self):
         sporsmal = self.query(
             f"SELECT * FROM Sporsmal"

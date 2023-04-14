@@ -107,6 +107,24 @@ def bruker_dashboard():
         return redirect(url_for('bruker_login'))
     
 
+@app.route("/quiz/<int:quiz_id>", methods=["GET", "POST"])
+@login_required
+def quiz(quiz_id):
+    with Database() as database:
+        quiz = database.get_quiz(quiz_id)
+        sporsmal_liste = database.get_sporsmal()
+        svar_liste = database.get_svar()
+
+        for sporsmal in sporsmal_liste:
+            if quiz.id_quiz == sporsmal.id_quiz:
+                quiz.sporsmal.append(sporsmal)
+                for svar in svar_liste:
+                    if sporsmal.id_sporsmal == svar.id_sporsmal:
+                        sporsmal.svar.append(svar)
+
+    return render_template("quiz.html", quiz=quiz)
+            
+
 @app.route("/brukerregistrering", methods=["GET", "POST"])
 def bruker_register():
     if request.method == "POST":
