@@ -62,10 +62,16 @@
     <li>{{ sporsmal.tekst }}</li>
     <ul>
         {% for svar in sporsmal.svar %}
-        <li {% if svar.is_riktig %}style="color:green; font-weight:bold;"{% endif %}>{{ svar.tekst }}</li>
-            {% endfor %}
+            <li {% if svar.is_riktig %}style="color:green; font-weight:bold;"{% endif %}>{{ svar.tekst }}</li>
+        {% endfor %}
     </ul>
-    {% endfor %}
+    <form action="/quiz/sporsmal/delete/<sporsmal_id>" method="POST">
+        <input type="hidden" id="quiz_id" name="quiz_id" value="{{ quiz.id_quiz }}">
+        <input type="hidden" id="sporsmal_id" name="sporsmal_id" value="{{ sporsmal.id_sporsmal }}">
+        <input type="submit" value="Slett dette spørsmålet">
+    </form>
+{% endfor %}
+
 </ul>
 {% else %}
 <p>Ingen spørsmål funnet i denne quizzen</p>
