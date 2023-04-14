@@ -177,7 +177,7 @@ def quiz_delete():
                 f"DELETE FROM Svar WHERE idQuiz = '{quiz_id}'"
             )
         return redirect(url_for('quiz_oversikt'))
-#Test
+    
 
 @app.route("/quiz/sporsmal/create", methods=["GET", "POST"])
 @login_required
