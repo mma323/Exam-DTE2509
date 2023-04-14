@@ -220,7 +220,7 @@ def sporsmal_create():
 
         return redirect(url_for('quiz_oversikt'))
     
-@app.route("/quiz/sporsmal/delete/<sporsmal_id>", methods=["POST"])
+@app.route("/quiz/sporsmal/delete/<sporsmal_id>", methods=["GET", "POST"])
 @login_required
 def sporsmal_delete(sporsmal_id):
     with Database() as database:
