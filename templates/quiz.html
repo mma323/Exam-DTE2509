@@ -1,7 +1,7 @@
 {% extends "brukerbase.html" %}
 
 {% block content %}
-<div class="container">
+<form class="quiz" method="post">
     <h1>{{ quiz.navn }}</h1>
     <p>Antall spørsmål: {{ quiz.get_antall_sporsmal() }}</p>
     <hr>
@@ -17,5 +17,6 @@
             {% endfor %}
         </ul>
     {% endfor %}
-</div>
+    <button type="submit">Svar</button>
+</form>
 {% endblock %}

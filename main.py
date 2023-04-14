@@ -4,9 +4,11 @@ from flask import (
 from flask_login import (
     LoginManager, login_required, login_user, logout_user, current_user
 )
+from werkzeug.routing import BaseConverter
 from Database import Database
 from Admin import Admin
 from Bruker import Bruker
+from Quiz import Quiz
 import os
 
 
@@ -107,6 +109,29 @@ def bruker_dashboard():
         return redirect(url_for('bruker_login'))
     
 
+#For å kunne sende quiz-objektet som parameter i URL
+class QuizConverter(BaseConverter):
+    def to_python(self, value):
+        with Database() as database:
+            quiz = database.get_quiz(int(value))
+            sporsmal_liste = database.get_sporsmal()
+            svar_liste = database.get_svar()
+
+            for sporsmal in sporsmal_liste:
+                if quiz.id_quiz == sporsmal.id_quiz:
+                    quiz.sporsmal.append(sporsmal)
+                    for svar in svar_liste:
+                        if sporsmal.id_sporsmal == svar.id_sporsmal:
+                            sporsmal.svar.append(svar)
+            return quiz
+
+    def to_url(self, value):
+        return str(value.id_quiz)
+
+
+app.url_map.converters['Quiz'] = QuizConverter
+    
+
 @app.route("/quiz/<int:quiz_id>", methods=["GET", "POST"])
 @login_required
 def quiz(quiz_id):
@@ -122,7 +147,71 @@ def quiz(quiz_id):
                     if sporsmal.id_sporsmal == svar.id_sporsmal:
                         sporsmal.svar.append(svar)
 
+    if request.method == "POST":
+            poeng = 0
+            for sporsmal in quiz.sporsmal:
+                valgt_svar_id = request.form.get(f"sporsmal{sporsmal.id_sporsmal}")
+                riktig_svar_id = None
+                for svar in sporsmal.svar:
+                    if svar.is_riktig:
+                        riktig_svar_id = svar.id_svar
+                        break
+                #Konverterer til int for å kunne sammenligne
+                #fordi request.form.get() returnerer string
+                if int(valgt_svar_id) == int(riktig_svar_id):
+                    poeng += 1
+                
+
+                with Database() as database:
+                    bruker_has_svar = database.query(
+                    f"""
+                    SELECT count(*) FROM Bruker_has_Svar
+                    WHERE Bruker_idBruker = '{current_user.bruker_id}'
+                    AND Svar_Sporsmal_Quiz_idQuiz = '{quiz.id_quiz}'
+                    AND Svar_Sporsmal_idSporsmal = '{sporsmal.id_sporsmal}'
+                    """
+                )
+
+                    if bruker_has_svar[0][0] == 0:
+                        database.insert(
+                            f"""
+                            INSERT INTO Bruker_has_Svar (
+                            Bruker_idBruker, 
+                            Svar_Sporsmal_Quiz_idQuiz, 
+                            Svar_Sporsmal_idSporsmal,
+                            Svar_idSvar
+                            )
+                            VALUES (
+                            '{current_user.bruker_id}',
+                            '{quiz.id_quiz}',
+                            '{sporsmal.id_sporsmal}',
+                            '{valgt_svar_id}'
+                            )
+                            """
+                        )
+                    else:
+                        database.insert(
+                            f"""
+                            UPDATE Bruker_has_Svar
+                            SET Svar_idSvar = '{valgt_svar_id}'
+                            WHERE Bruker_idBruker = '{current_user.bruker_id}'
+                            AND Svar_Sporsmal_Quiz_idQuiz = '{quiz.id_quiz}'
+                            AND Svar_Sporsmal_idSporsmal = '{sporsmal.id_sporsmal}'
+                            """
+                        )
+
+            print("quiz før redirect: ", quiz)
+            return redirect(url_for("quiz_result", quiz=quiz, poeng=poeng))
+    
     return render_template("quiz.html", quiz=quiz)
+
+
+@app.route('/quiz_result/<Quiz:quiz>/<int:poeng>')
+@login_required
+def quiz_result(quiz, poeng):
+    print("quiz etter redirect: ", quiz)
+    print(poeng)
+    return render_template('quiz_result.html', quiz=quiz, poeng=poeng)
             
 
 @app.route("/brukerregistrering", methods=["GET", "POST"])
