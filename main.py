@@ -5,6 +5,7 @@ from flask_login import (
     LoginManager, login_required, login_user, logout_user, current_user
 )
 from werkzeug.routing import BaseConverter
+from functools import wraps
 from Database import Database
 from Admin import Admin
 from Bruker import Bruker
@@ -37,6 +38,29 @@ def load_user(id):
         if bruker:
             return Bruker(*bruker[0]) #Indeks fordi databasen bruker fetchall()
     return None
+
+#Annoterer for å hindre at innlogget bruker kan gå til admin-sider,
+#i tillegg til login_required
+def admin_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if isinstance(current_user, Admin):
+            return func(*args, **kwargs)
+        else:
+            return redirect(url_for('admin_login'))
+    return wrapper
+
+
+#Annoterer for å hindre at innlogget admin kan gå til bruker-sider,
+#i tillegg til login_required
+def bruker_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if isinstance(current_user, Bruker):
+            return func(*args, **kwargs)
+        else:
+            return redirect(url_for('bruker_login'))
+    return wrapper
 
 
 @app.route("/")
@@ -134,6 +158,7 @@ app.url_map.converters['Quiz'] = QuizConverter
 
 @app.route("/quiz/<int:quiz_id>", methods=["GET", "POST"])
 @login_required
+@bruker_required
 def quiz(quiz_id):
     with Database() as database:
         quiz = database.get_quiz(quiz_id)
@@ -208,6 +233,7 @@ def quiz(quiz_id):
 
 @app.route('/quiz_result/<Quiz:quiz>/<int:poeng>')
 @login_required
+@bruker_required
 def quiz_result(quiz, poeng):
     print("quiz etter redirect: ", quiz)
     print(poeng)
@@ -236,6 +262,7 @@ def logout():
 
 @app.route("/quizzer", methods=["GET", "POST"])
 @login_required
+@admin_required
 def quiz_oversikt():
     with Database() as database:
         quizzer = database.get_quizzer()
@@ -260,6 +287,7 @@ def quiz_oversikt():
 
 @app.route("/quiz/create", methods=["GET", "POST"])
 @login_required
+@admin_required
 def quiz_create():
     if request.method == "POST":
         quiz_navn = request.form.get("quiz_navn")
@@ -272,24 +300,21 @@ def quiz_create():
 
 @app.route("/quiz/delete", methods=["GET", "POST"])
 @login_required
+@admin_required
 def quiz_delete():
     if request.method == "POST":
         quiz_id = request.form.get("quiz")
         with Database() as database:
+            #Databasen kaskaderer sletting av quiz til svar og spørsmål
             database.insert(
                 f"DELETE FROM Quiz WHERE idQuiz = '{quiz_id}'"
-            )
-            database.insert(
-                f"DELETE FROM Sporsmal WHERE idQuiz = '{quiz_id}'"
-            )
-            database.insert(
-                f"DELETE FROM Svar WHERE idQuiz = '{quiz_id}'"
             )
         return redirect(url_for('quiz_oversikt'))
     
 
 @app.route("/quiz/sporsmal/create", methods=["GET", "POST"])
 @login_required
+@admin_required
 def sporsmal_create():
     if request.method == "POST":
         quiz_id = request.form.get("quiz_id")
@@ -328,8 +353,10 @@ def sporsmal_create():
 
         return redirect(url_for('quiz_oversikt'))
     
+
 @app.route("/quiz/sporsmal/delete/<sporsmal_id>", methods=["GET", "POST"])
 @login_required
+@admin_required
 def sporsmal_delete(sporsmal_id):
     with Database() as database:
         database.insert(f"DELETE FROM Svar WHERE Sporsmal_idSporsmal = '{sporsmal_id}'")
