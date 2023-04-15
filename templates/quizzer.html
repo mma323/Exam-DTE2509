@@ -58,24 +58,52 @@
 {% if quiz.sporsmal %}
 <h3>Spørsmål:</h3>
 <ul>
-    {% for sporsmal in quiz.sporsmal %}
-    <li>{{ sporsmal.tekst }}</li>
+  {% for sporsmal in quiz.sporsmal %}
+  <li>
+    {{ sporsmal.tekst }}
     <ul>
-        {% for svar in sporsmal.svar %}
-            <li {% if svar.is_riktig %}style="color:green; font-weight:bold;"{% endif %}>{{ svar.tekst }}</li>
-        {% endfor %}
+      {% for svar in sporsmal.svar %}
+      <li {% if svar.is_riktig %}style="color:green; font-weight:bold;"{% endif %}>{{ svar.tekst }}</li>
+      {% endfor %}
     </ul>
     <form action="/quiz/sporsmal/delete/{{sporsmal.id_sporsmal}}" method="POST">
-        <input type="hidden" id="quiz_id" name="quiz_id" value="{{ quiz.id_quiz }}">
-        <input type="hidden" id="sporsmal_id" name="sporsmal_id" value="{{ sporsmal.id_sporsmal }}">
-        <input type="submit" value="Slett dette spørsmålet">
+      <input type="hidden" id="quiz_id" name="quiz_id" value="{{ quiz.id_quiz }}">
+      <input type="hidden" id="sporsmal_id" name="sporsmal_id" value="{{ sporsmal.id_sporsmal }}">
+      <input type="submit" value="Slett dette spørsmålet">
     </form>
-{% endfor %}
-
+    <button onclick="toggleEditForm('{{ sporsmal.id_sporsmal }}')">Rediger</button>
+    <div id="editForm{{ sporsmal.id_sporsmal }}" style="display:none;">
+      <form action="/quiz/sporsmal/edit/{{ sporsmal.id_sporsmal }}" method="POST">
+        <input type="hidden" id="quiz_id" name="quiz_id" value="{{ quiz.id_quiz }}">
+        <input type="text" id="sporsmal_tekst" name="sporsmal_tekst" value="{{ sporsmal.tekst }}">
+        <ul>
+          {% for svar in sporsmal.svar %}
+          <li>
+            <input type="text" id="svar_tekst" name="svar_tekst" value="{{ svar.tekst }}">
+            <input type="checkbox" id="is_riktig" name="is_riktig" {% if svar.is_riktig %}checked{% endif %}>
+            <label for="is_riktig">Riktig svar</label>
+          </li>
+          {% endfor %}
+        </ul>
+        <input type="submit" value="Lagre endringer">
+      </form>
+    </div>
+  </li>
+  {% endfor %}
 </ul>
-{% else %}
-<p>Ingen spørsmål funnet i denne quizzen</p>
 {% endif %}
+
+<script>
+  function toggleEditForm(sporsmalId) {
+    var form = document.getElementById('editForm' + sporsmalId);
+    if (form.style.display === 'none') {
+      form.style.display = 'block';
+    } else {
+      form.style.display = 'none';
+    }
+  }
+</script>
+
 {% endfor %}
 {% endif %}
 {% endblock %}
