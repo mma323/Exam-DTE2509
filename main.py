@@ -5,11 +5,11 @@ from flask_login import (
     LoginManager, login_required, login_user, logout_user, current_user
 )
 from werkzeug.routing import BaseConverter
-from functools import wraps
 from Database import Database
 from Admin import Admin
 from Bruker import Bruker
 import os
+from functools import wraps
 
 
 app = Flask(__name__,
@@ -37,6 +37,7 @@ def load_user(id):
         if bruker:
             return Bruker(*bruker[0]) #Indeks fordi databasen bruker fetchall()
     return None
+
 
 #Annoterer for å hindre at innlogget bruker kan gå til admin-sider,
 #i tillegg til login_required
@@ -158,7 +159,6 @@ app.url_map.converters['Quiz'] = QuizConverter
 
 @app.route("/quiz/<int:quiz_id>", methods=["GET", "POST"])
 @login_required
-@bruker_required
 def quiz(quiz_id):
     with Database() as database:
         quiz = database.get_quiz(quiz_id)
@@ -240,7 +240,6 @@ def quiz(quiz_id):
 
 @app.route('/quiz_result/<Quiz:quiz>/<int:poeng>')
 @login_required
-@bruker_required
 def quiz_result(quiz, poeng):
     print("quiz etter redirect: ", quiz)
     print(poeng)
@@ -270,7 +269,6 @@ def logout():
 
 @app.route("/quizzer", methods=["GET", "POST"])
 @login_required
-@admin_required
 def quiz_oversikt():
     with Database() as database:
         quizzer = database.get_quizzer()
@@ -295,7 +293,6 @@ def quiz_oversikt():
 
 @app.route("/quiz/create", methods=["GET", "POST"])
 @login_required
-@admin_required
 def quiz_create():
     if request.method == "POST":
         quiz_navn = request.form.get("quiz_navn")
@@ -309,12 +306,10 @@ def quiz_create():
 
 @app.route("/quiz/delete", methods=["GET", "POST"])
 @login_required
-@admin_required
 def quiz_delete():
     if request.method == "POST":
         quiz_id = request.form.get("quiz")
         with Database() as database:
-            #Databasen kaskaderer sletting av quiz til svar og spørsmål
             database.insert(
                 f"DELETE FROM Quiz WHERE idQuiz = '{quiz_id}'"
             )
@@ -324,7 +319,6 @@ def quiz_delete():
 
 @app.route("/quiz/sporsmal/create", methods=["GET", "POST"])
 @login_required
-@admin_required
 def sporsmal_create():
     if request.method == "POST":
         quiz_id = request.form.get("quiz_id")
@@ -365,10 +359,41 @@ def sporsmal_create():
 
         return redirect(url_for('quiz_oversikt'))
     
-
+@app.route("/quiz/sporsmal/edit/<sporsmal_id>", methods=["GET", "POST"])
+@login_required
+def sporsmal_edit(sporsmal_id):
+    if request.method == "POST":
+        quiz_id = request.form.get("quiz_id")
+        sporsmal_tekst = request.form.get("sporsmal_tekst")
+        with Database() as database:
+            # oppdater spørsmålstekst
+            database.insert(
+                f"""
+                UPDATE Sporsmal 
+                SET Tekst = '{sporsmal_tekst}' 
+                WHERE idSporsmal = '{sporsmal_id}' AND Quiz_idQuiz = '{quiz_id}'
+                """
+            )
+            svar_id_list = request.form.getlist("svar_id")
+            svar_tekst_list = request.form.getlist("svar_tekst")
+            svar_riktig_list = request.form.getlist("riktig_svar")
+            print(svar_id_list, svar_tekst_list, svar_riktig_list)
+            for index, svar_id in enumerate(svar_id_list):
+                svar_tekst = svar_tekst_list[index]
+                is_riktig = "1" if svar_id in svar_riktig_list else "0"
+                print(index, svar_id, svar_tekst, is_riktig)
+                # oppdater svar
+                database.insert(
+                    f"""
+                    UPDATE Svar 
+                    SET Tekst = '{svar_tekst}', isRiktig = '{is_riktig}'
+                    WHERE idSvar = '{svar_id}' AND Sporsmal_idSporsmal = '{sporsmal_id}' AND Sporsmal_Quiz_idQuiz = '{quiz_id}'
+                    """
+                )
+        return redirect(url_for('quiz_oversikt'))  
+    
 @app.route("/quiz/sporsmal/delete/<sporsmal_id>", methods=["GET", "POST"])
 @login_required
-@admin_required
 def sporsmal_delete(sporsmal_id):
     with Database() as database:
         #SQL for å slette spørsmål og tilhørende svar i databasen
