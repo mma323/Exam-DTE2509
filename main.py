@@ -346,9 +346,11 @@ def sporsmal_edit(sporsmal_id):
             svar_id_list = request.form.getlist("svar_id")
             svar_tekst_list = request.form.getlist("svar_tekst")
             svar_riktig_list = request.form.getlist("riktig_svar")
+            print(svar_id_list, svar_tekst_list, svar_riktig_list)
             for index, svar_id in enumerate(svar_id_list):
                 svar_tekst = svar_tekst_list[index]
                 is_riktig = "1" if svar_id in svar_riktig_list else "0"
+                print(index, svar_id, svar_tekst, is_riktig)
                 # oppdater svar
                 database.insert(
                     f"""
@@ -357,7 +359,6 @@ def sporsmal_edit(sporsmal_id):
                     WHERE idSvar = '{svar_id}' AND Sporsmal_idSporsmal = '{sporsmal_id}' AND Sporsmal_Quiz_idQuiz = '{quiz_id}'
                     """
                 )
-            database.commit()
         return redirect(url_for('quiz_oversikt'))  
     
 @app.route("/quiz/sporsmal/delete/<sporsmal_id>", methods=["GET", "POST"])

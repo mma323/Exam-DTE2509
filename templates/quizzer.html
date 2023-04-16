@@ -79,9 +79,10 @@
         <ul>
           {% for svar in sporsmal.svar %}
           <li>
+            <input type="hidden" id="svar_id" name="svar_id" value="{{ svar.id_svar }}">
             <input type="text" id="svar_tekst" name="svar_tekst" value="{{ svar.tekst }}">
-            <input type="checkbox" id="is_riktig" name="is_riktig" {% if svar.is_riktig %}checked{% endif %}>
-            <label for="is_riktig">Riktig svar</label>
+            <input type="radio" id="is_riktig_{{ svar.id_svar }}" name="riktig_svar" value="{{ svar.id_svar }}" {% if svar.is_riktig %}checked{% endif %}>
+            <label for="is_riktig_{{ svar.id_svar }}">Riktig svar</label>
           </li>
           {% endfor %}
         </ul>
