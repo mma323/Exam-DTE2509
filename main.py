@@ -9,7 +9,6 @@ from functools import wraps
 from Database import Database
 from Admin import Admin
 from Bruker import Bruker
-from Quiz import Quiz
 import os
 
 
@@ -98,6 +97,7 @@ def admin_register():
         admin_fornavn = request.form.get("fornavn")
         admin_etternavn = request.form.get("etternavn")
         with Database() as database:
+            #SQL for å legge til admin i databasen
             database.insert(
                 f"""
                 INSERT INTO Admin (idAdmin, fornavn, etternavn) 
@@ -175,7 +175,9 @@ def quiz(quiz_id):
     if request.method == "POST":
             poeng = 0
             for sporsmal in quiz.sporsmal:
-                valgt_svar_id = request.form.get(f"sporsmal{sporsmal.id_sporsmal}")
+                valgt_svar_id = (
+                    request.form.get(f"sporsmal{sporsmal.id_sporsmal}")
+                )
                 riktig_svar_id = None
                 for svar in sporsmal.svar:
                     if svar.is_riktig:
@@ -188,6 +190,7 @@ def quiz(quiz_id):
                 
 
                 with Database() as database:
+                    #SQL for å sjekke om bruker har svart på spørsmålet
                     bruker_has_svar = database.query(
                     f"""
                     SELECT count(*) FROM Bruker_has_Svar
@@ -198,6 +201,8 @@ def quiz(quiz_id):
                 )
 
                     if bruker_has_svar[0][0] == 0:
+                        #SQL for å legge en bruker sitt svar
+                        #på et spørsmål i databasen
                         database.insert(
                             f"""
                             INSERT INTO Bruker_has_Svar (
@@ -215,13 +220,15 @@ def quiz(quiz_id):
                             """
                         )
                     else:
+                        #SQL for å oppdatere en bruker sitt svar
                         database.insert(
                             f"""
                             UPDATE Bruker_has_Svar
                             SET Svar_idSvar = '{valgt_svar_id}'
                             WHERE Bruker_idBruker = '{current_user.bruker_id}'
                             AND Svar_Sporsmal_Quiz_idQuiz = '{quiz.id_quiz}'
-                            AND Svar_Sporsmal_idSporsmal = '{sporsmal.id_sporsmal}'
+                            AND 
+                            Svar_Sporsmal_idSporsmal = '{sporsmal.id_sporsmal}'
                             """
                         )
 
@@ -245,6 +252,7 @@ def bruker_register():
     if request.method == "POST":
         bruker_id = "bruker_" + request.form.get("bruker_id")
         with Database() as database:
+            #SQL for å registrere bruker i databasen
             database.insert(
                 f"INSERT INTO Bruker (idBruker) VALUES ('{bruker_id}')"
             )
@@ -292,6 +300,7 @@ def quiz_create():
     if request.method == "POST":
         quiz_navn = request.form.get("quiz_navn")
         with Database() as database:
+            #SQL for å registrere ny quiz i databasen
             database.insert(
                 f"INSERT INTO Quiz (navn) VALUES ('{quiz_navn}')"
             )
@@ -322,6 +331,7 @@ def sporsmal_create():
         sporsmal_id = request.form.get("sporsmal_nummer")
         sporsmal_tekst = request.form.get("sporsmal_tekst")
         with Database() as database:
+            #SQL for å registrere nytt spørsmål i databasen
             database.insert(
                 f"""
                 INSERT INTO Sporsmal (
@@ -333,6 +343,7 @@ def sporsmal_create():
             svar = ["svar1", "svar2", "svar3", "svar4"]
             svar_riktig = request.form.get("riktig_svar")
             for index, svar in enumerate(svar):
+                #SQL for å registrere svar i databasen
                 database.insert(
                     f"""
                     INSERT INTO Svar (
@@ -360,9 +371,13 @@ def sporsmal_create():
 @admin_required
 def sporsmal_delete(sporsmal_id):
     with Database() as database:
-        database.insert(f"DELETE FROM Svar WHERE Sporsmal_idSporsmal = '{sporsmal_id}'")
-
-        database.insert(f"DELETE FROM Sporsmal WHERE idSporsmal = '{sporsmal_id}'")
+        #SQL for å slette spørsmål og tilhørende svar i databasen
+        database.insert(
+            f"DELETE FROM Svar WHERE Sporsmal_idSporsmal = '{sporsmal_id}'"
+        )
+        database.insert(
+            f"DELETE FROM Sporsmal WHERE idSporsmal = '{sporsmal_id}'"
+        )
         
     return redirect(url_for('quiz_oversikt'))
 
@@ -372,6 +387,7 @@ def sporsmal_delete(sporsmal_id):
 @admin_required
 def bruker_svar():
     with Database() as database:
+        #SQL for å hente ut brukere sine svar på spørsmål
         bruker_svar = database.query(
             """
             SELECT 
