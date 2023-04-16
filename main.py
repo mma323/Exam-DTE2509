@@ -374,7 +374,17 @@ def bruker_svar():
     with Database() as database:
         bruker_svar = database.query(
             """
-            SELECT * FROM Bruker_has_Svar
+            SELECT 
+            Bruker_has_Svar.Bruker_idBruker, 
+            Quiz.navn, 
+            Sporsmal.Tekst, 
+            Svar.Tekst,
+            Svar.isRiktig
+            FROM Bruker_has_Svar, Quiz, Sporsmal, Svar
+            WHERE Bruker_has_Svar.Svar_Sporsmal_Quiz_idQuiz = Quiz.idQuiz
+            AND Bruker_has_Svar.Svar_Sporsmal_idSporsmal = Sporsmal.idSporsmal
+            AND Bruker_has_Svar.Svar_idSvar = Svar.idSvar
+            ORDER BY Sporsmal.Tekst;
             """
         )
     return render_template("brukersvar.html", bruker_svar=bruker_svar)
