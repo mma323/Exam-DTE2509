@@ -71,7 +71,7 @@ def start():
 @app.route("/adminlogin", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
-        #Legger til admin_ foran id for å skille mellom bruker og admin
+        #Legger til admin_ foran id for å skille mellom bruker og admin i db
         admin_id = "admin_" + request.form.get("admin_id")
         print(admin_id)
         admin = load_user(admin_id)
@@ -309,6 +309,7 @@ def quiz_delete():
             database.insert(
                 f"DELETE FROM Quiz WHERE idQuiz = '{quiz_id}'"
             )
+
         return redirect(url_for('quiz_oversikt'))
     
 
@@ -364,6 +365,20 @@ def sporsmal_delete(sporsmal_id):
         database.insert(f"DELETE FROM Sporsmal WHERE idSporsmal = '{sporsmal_id}'")
         
     return redirect(url_for('quiz_oversikt'))
-   
+
+
+@app.route("/brukersvar", methods=["GET", "POST"])
+@login_required
+@admin_required
+def bruker_svar():
+    with Database() as database:
+        bruker_svar = database.query(
+            """
+            SELECT * FROM Bruker_has_Svar
+            """
+        )
+    return render_template("brukersvar.html", bruker_svar=bruker_svar)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
