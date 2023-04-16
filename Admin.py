@@ -5,6 +5,8 @@ class Admin:
         self.etternavn = etternavn
 
 
+#Disse funksjonene er nødvendige for å kunne bruke flask-login
+
     def is_active(self):
         return True
     
