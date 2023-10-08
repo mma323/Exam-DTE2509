@@ -1,0 +1,70 @@
+{% extends "adminbase.html" %}
+{% block content %}
+
+<form action="/quizgjennomgang/delete/{{bruker_id}}/{{quiz.id_quiz}}">
+    <button type="submit">Slett hele gjennomføringen</button>
+</form>
+
+<form class="quiz_gjennomgang" action="{{ url_for('quiz_gjennomgang', quiz_id=quiz.id_quiz, bruker_id=bruker_id) }}"
+    method="post">
+    <h1>{{ quiz.navn }} - {{bruker_id}}</h1>
+    <p>Antall spørsmål: {{ quiz.get_antall_sporsmal() }}</p>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="kommentar_quiz">Kommentar for hele quizzen:</label><br>
+    <textarea name="kommentar_quiz" rows="4" cols="50">{{bruker_quiz_relasjon.kommentar}}</textarea><br><br>
+    <hr>
+
+
+    <button type="button" onclick="checkRiktig()">Godkjenn alle spørsmål</button>
+
+
+    {% for sporsmal in quiz.sporsmal %}
+    {% if sporsmal.svar %}
+    <h3>{{ sporsmal.tekst }}</h3>
+    <ul>
+        {% set bruker_svar = bruker_svar_dictionary.get(sporsmal.id_sporsmal) %}
+        {% for svar in sporsmal.svar %}
+        <li>
+            <label>
+                <input type="radio" name="sporsmal{{ sporsmal.id_sporsmal }}" value="{{ svar.id_svar }}" {% if
+                    bruker_svar and bruker_svar.id_svar==svar.id_svar %}checked{% endif %} disabled>
+                {{ svar.tekst }}
+            </label>
+        </li>
+        {% endfor %}
+        <br><br>
+        <label>
+            <input type="radio" name="riktig{{ sporsmal.id_sporsmal }}" value="riktig" {% if bruker_svar and
+                bruker_svar.is_riktig %}checked{% endif %} {% if not bruker_svar %}disabled{% endif %}>
+            Godkjent
+        </label>
+        <label>
+            <input type="radio" name="riktig{{ sporsmal.id_sporsmal }}" value="ikke-riktig" {% if bruker_svar and not
+                bruker_svar.is_riktig %}checked{% endif %} {% if not bruker_svar %}disabled{% endif %}>
+            Ikke godkjent<br><br>
+        </label>
+        <form action="/quizgjennomgang/delete/{{bruker_id}}/{{quiz.id_quiz}}/{{sporsmal.id_sporsmal}}">
+            <button type="submit">Slett upassende svar</button>
+        </form>
+        <br><br>
+        <label for="kommentar{{ sporsmal.id_sporsmal }}">Kommentar:</label><br>
+        <textarea name="kommentar{{ sporsmal.id_sporsmal }}" {% if not bruker_svar %}disabled{% endif
+            %}>{{ bruker_svar.kommentar if bruker_svar else '' }}</textarea>
+
+    </ul>
+    {% endif %}
+    {% endfor %}
+    <button type="submit">Svar</button>
+</form>
+
+<script>
+    function checkRiktig() {
+        var riktigRadios = document.querySelectorAll("input[type=radio][value=riktig]");
+        riktigRadios.forEach(function (radio) {
+            radio.checked = true;
+        });
+    }
+
+</script>
+
+{% endblock %}

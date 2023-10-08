@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: 16. Apr, 2023 19:58 PM
+-- Generation Time: 02. Jun, 2023 21:54 PM
 -- Tjener-versjon: 10.11.2-MariaDB-1:10.11.2+maria~ubu2204
 -- PHP Version: 8.1.15
 
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `myDb`
 --
-CREATE DATABASE IF NOT EXISTS `myDb` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `myDb`;
 
 -- --------------------------------------------------------
 
@@ -32,16 +30,13 @@ USE `myDb`;
 CREATE TABLE `Admin` (
   `idAdmin` varchar(45) NOT NULL,
   `Fornavn` varchar(45) DEFAULT NULL,
-  `Etternavn` varchar(45) DEFAULT NULL
+  `Etternavn` varchar(45) DEFAULT NULL,
+  `Passordhash` varchar(128) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dataark for tabell `Admin`
 --
-
-INSERT INTO `Admin` (`idAdmin`, `Fornavn`, `Etternavn`) VALUES
-('admin_1', 'Navn', 'Navnesen'),
-('admin_3', 'hei', 'heiesen');
 
 -- --------------------------------------------------------
 
@@ -57,8 +52,23 @@ CREATE TABLE `Bruker` (
 -- Dataark for tabell `Bruker`
 --
 
-INSERT INTO `Bruker` (`idBruker`) VALUES
-('bruker_1');
+
+-- --------------------------------------------------------
+
+--
+-- Tabellstruktur for tabell `Bruker_has_Quiz`
+--
+
+CREATE TABLE `Bruker_has_Quiz` (
+  `Bruker_idBruker` varchar(45) NOT NULL,
+  `Quiz_idQuiz` int(11) NOT NULL,
+  `Kommentar` varchar(45) DEFAULT NULL,
+  `Godkjent` tinyint(4) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dataark for tabell `Bruker_has_Quiz`
+--
 
 -- --------------------------------------------------------
 
@@ -70,15 +80,15 @@ CREATE TABLE `Bruker_has_Svar` (
   `Bruker_idBruker` varchar(45) NOT NULL,
   `Svar_Sporsmal_Quiz_idQuiz` int(11) NOT NULL,
   `Svar_Sporsmal_idSporsmal` int(11) NOT NULL,
-  `Svar_idSvar` int(11) NOT NULL
+  `Svar_idSvar` int(11) NOT NULL,
+  `isRiktig` tinyint(4) DEFAULT NULL,
+  `Kommentar` varchar(45) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dataark for tabell `Bruker_has_Svar`
 --
 
-INSERT INTO `Bruker_has_Svar` (`Bruker_idBruker`, `Svar_Sporsmal_Quiz_idQuiz`, `Svar_Sporsmal_idSporsmal`, `Svar_idSvar`) VALUES
-('bruker_1', 12, 4, 4);
 
 -- --------------------------------------------------------
 
@@ -95,8 +105,6 @@ CREATE TABLE `Quiz` (
 -- Dataark for tabell `Quiz`
 --
 
-INSERT INTO `Quiz` (`idQuiz`, `Navn`) VALUES
-(12, 'NyQuiz');
 
 -- --------------------------------------------------------
 
@@ -108,15 +116,33 @@ CREATE TABLE `Sporsmal` (
   `Quiz_idQuiz` int(11) NOT NULL,
   `idSporsmal` int(11) NOT NULL,
   `Tekst` mediumtext DEFAULT NULL,
-  `Tema_idTema` int(11) NOT NULL
+  `Tema_idTema` int(11) NOT NULL,
+  `Sporsmalstype_idSporsmalstype` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dataark for tabell `Sporsmal`
 --
 
-INSERT INTO `Sporsmal` (`Quiz_idQuiz`, `idSporsmal`, `Tekst`, `Tema_idTema`) VALUES
-(12, 4, 'hva er kvadratroten av 16', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Tabellstruktur for tabell `Sporsmalstype`
+--
+
+CREATE TABLE `Sporsmalstype` (
+  `idSporsmalstype` int(11) NOT NULL,
+  `Navn` varchar(45) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dataark for tabell `Sporsmalstype`
+--
+
+INSERT INTO `Sporsmalstype` (`idSporsmalstype`, `Navn`) VALUES
+(1, 'flervalg'),
+(2, 'essay');
 
 -- --------------------------------------------------------
 
@@ -141,19 +167,11 @@ CREATE TABLE `Svar` (
   `Sporsmal_Quiz_idQuiz` int(11) NOT NULL,
   `Sporsmal_idSporsmal` int(11) NOT NULL,
   `idSvar` int(11) NOT NULL,
-  `Tekst` mediumtext DEFAULT NULL,
-  `isRiktig` tinyint(4) DEFAULT NULL
+  `Tekst` mediumtext DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dataark for tabell `Svar`
---
 
-INSERT INTO `Svar` (`Sporsmal_Quiz_idQuiz`, `Sporsmal_idSporsmal`, `idSvar`, `Tekst`, `isRiktig`) VALUES
-(12, 4, 1, '1', 1),
-(12, 4, 2, '2', 0),
-(12, 4, 3, '3', 0),
-(12, 4, 4, '4', 0);
 
 -- --------------------------------------------------------
 
@@ -170,10 +188,6 @@ CREATE TABLE `Tema` (
 -- Dataark for tabell `Tema`
 --
 
-INSERT INTO `Tema` (`idTema`, `Navn`) VALUES
-(1, 'Sport'),
-(2, 'Historie'),
-(3, 'Matematikk');
 
 --
 -- Indexes for dumped tables
@@ -190,6 +204,14 @@ ALTER TABLE `Admin`
 --
 ALTER TABLE `Bruker`
   ADD PRIMARY KEY (`idBruker`);
+
+--
+-- Indexes for table `Bruker_has_Quiz`
+--
+ALTER TABLE `Bruker_has_Quiz`
+  ADD PRIMARY KEY (`Bruker_idBruker`,`Quiz_idQuiz`),
+  ADD KEY `fk_Bruker_has_Quiz_Quiz1_idx` (`Quiz_idQuiz`),
+  ADD KEY `fk_Bruker_has_Quiz_Bruker1_idx` (`Bruker_idBruker`);
 
 --
 -- Indexes for table `Bruker_has_Svar`
@@ -211,7 +233,14 @@ ALTER TABLE `Quiz`
 ALTER TABLE `Sporsmal`
   ADD PRIMARY KEY (`Quiz_idQuiz`,`idSporsmal`),
   ADD KEY `fk_Sporsmal_Tema1_idx` (`Tema_idTema`),
-  ADD KEY `fk_Sporsmal_Quiz1_idx` (`Quiz_idQuiz`);
+  ADD KEY `fk_Sporsmal_Quiz1_idx` (`Quiz_idQuiz`),
+  ADD KEY `fk_Sporsmal_Sporsmalstype1_idx` (`Sporsmalstype_idSporsmalstype`);
+
+--
+-- Indexes for table `Sporsmalstype`
+--
+ALTER TABLE `Sporsmalstype`
+  ADD PRIMARY KEY (`idSporsmalstype`);
 
 --
 -- Indexes for table `Sporsmal_has_Admin`
@@ -242,11 +271,30 @@ ALTER TABLE `Tema`
 -- AUTO_INCREMENT for table `Quiz`
 --
 ALTER TABLE `Quiz`
-  MODIFY `idQuiz` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `idQuiz` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `Sporsmalstype`
+--
+ALTER TABLE `Sporsmalstype`
+  MODIFY `idSporsmalstype` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `Tema`
+--
+ALTER TABLE `Tema`
+  MODIFY `idTema` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Begrensninger for dumpede tabeller
 --
+
+--
+-- Begrensninger for tabell `Bruker_has_Quiz`
+--
+ALTER TABLE `Bruker_has_Quiz`
+  ADD CONSTRAINT `fk_Bruker_has_Quiz_Bruker1` FOREIGN KEY (`Bruker_idBruker`) REFERENCES `Bruker` (`idBruker`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_Bruker_has_Quiz_Quiz1` FOREIGN KEY (`Quiz_idQuiz`) REFERENCES `Quiz` (`idQuiz`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Begrensninger for tabell `Bruker_has_Svar`
@@ -260,6 +308,7 @@ ALTER TABLE `Bruker_has_Svar`
 --
 ALTER TABLE `Sporsmal`
   ADD CONSTRAINT `fk_Sporsmal_Quiz1` FOREIGN KEY (`Quiz_idQuiz`) REFERENCES `Quiz` (`idQuiz`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_Sporsmal_Sporsmalstype1` FOREIGN KEY (`Sporsmalstype_idSporsmalstype`) REFERENCES `Sporsmalstype` (`idSporsmalstype`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_Sporsmal_Tema1` FOREIGN KEY (`Tema_idTema`) REFERENCES `Tema` (`idTema`) ON UPDATE CASCADE;
 
 --

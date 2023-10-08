@@ -1,0 +1,30 @@
+.resultat-tabell {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.resultat-tabell th,
+.resultat-tabell td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+}
+
+.resultat-tabell th {
+    background-color: #f2f2f2;
+}
+
+.resultat-tabell tr:hover {
+    background-color: #f5f5f5;
+}
+
+tr:hover {
+    background: red;
+}
+
+td a {
+    display: block;
+    border: 1px solid white;
+    padding: 16px;
+    text-decoration: none;
+}

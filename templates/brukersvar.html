@@ -1,45 +1,24 @@
-<style>
-  .resultat-tabell {
-      border-collapse: collapse;
-      width: 100%;
-  }
-
-  .resultat-tabell th,
-  .resultat-tabell td {
-      border: 1px solid black;
-      padding: 8px;
-      text-align: left;
-  }
-
-  .resultat-tabell th {
-      background-color: #f2f2f2;
-  }
-
-  .resultat-tabell tr:hover {
-      background-color: #f5f5f5;
-  }
-</style>
-
 {% extends "adminbase.html" %}
 {% block content %}
-    <table class="resultat-tabell">
-        <thead>
-            <tr>
-                <th>Bruker</th>
-                <th>Quiz</th>
-                <th>Spm</th>
-                <th>Svar</th>
-                <th>Riktig</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in bruker_svar %}
-            <tr>
-                {% for item in row %}
-                <td>{{ item }}</td>
-                {% endfor %}
-            </tr>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='brukersvar.css') }}">
+<table class="resultat-tabell">
+    <thead>
+        <tr>
+            <th>Bruker</th>
+            <th>Quiz</th>
+            <th>Kommentar</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in quiz_gjennomforinger %}
+        {% set bruker = row[0] %}
+        {% set quiz = row[1] %}
+        <tr>
+            {% for item in row %}
+            <td><a href="/quizgjennomgang/{{ bruker }}/{{ quiz }}">{{ item }}</a></td>
             {% endfor %}
-        </tbody>
-    </table>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

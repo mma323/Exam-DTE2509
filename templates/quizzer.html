@@ -1,31 +1,41 @@
 {% extends "adminbase.html" %}
-
 {% block content %}
 <h1>Administrer quizzer</h1>
 <hr>
 
 <h2>Lag en ny quiz</h2>
 <form action="/quiz/create" method="POST">
-    <label for="quiz_navn">Navn på quiz:</label>
-    <input type="text" id="quiz_navn" name="quiz_navn" required><br><br>
-    <input type="submit" value="Legg til Quiz">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label for="quiz_navn">Navn på quiz:</label>
+  <input type="text" id="quiz_navn" name="quiz_navn" required><br><br>
+  <input type="submit" value="Legg til Quiz">
 </form>
 <hr>
 
 <h2>Slett en quiz</h2>
 {% if quizzes %}
 <form action="/quiz/delete" method="POST">
-    <label for="quiz">Velg hvilken quiz som skal slettes:</label>
-    <select id="quiz" name="quiz">
-        {% for quiz in quizzes %}
-        <option value="{{ quiz.id_quiz }}">{{ quiz.navn }}</option>
-        {% endfor %}
-    </select><br><br>
-    <input type="submit" value="Slett valgt Quiz">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label for="quiz">Velg hvilken quiz som skal slettes:</label>
+  <select id="quiz" name="quiz">
+    {% for quiz in quizzes %}
+    <option value="{{ quiz.id_quiz }}">{{ quiz.navn }}</option>
+    {% endfor %}
+  </select><br><br>
+  <input type="submit" value="Slett valgt Quiz">
 </form>
 {% else %}
 <p>Ingen quizzer funnet</p>
 {% endif %}
+<hr>
+
+<h2>Opprett et nytt tema</h2>
+<form action="/tema/create" method="POST">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label for="tema_navn">Navn på tema:</label>
+  <input type="text" id="tema_navn" name="tema_navn" required><br><br>
+  <input type="submit" value="Opprett tema">
+</form>
 <hr>
 
 {% if quizzes %}
@@ -33,27 +43,31 @@
 <h2>Spørsmål i {{ quiz.navn }}</h2>
 <h3>Legg til spørsmål</h3>
 <form action="/quiz/sporsmal/create" method="POST">
-    <input type="hidden" id="quiz_id" name="quiz_id" value="{{ quiz.id_quiz }}">
-    <input type="hidden" id="sporsmal_nummer" name="sporsmal_nummer" value="{{ quiz.get_antall_sporsmal() + 1}}">
-    <label for="sporsmal_text">Spørsmål:</label>
-    <input type="text" id="sporsmal_tekst" name="sporsmal_tekst" required><br><br>
-    <label for="svar1">Svar 1:</label>
-    <input type="text" id="svar1" name="svar1" required>
-    <input type="radio" id="riktig1" name="riktig_svar" value="1" required>
-    <label for="riktig1">Riktig svar</label><br>
-    <label for="svar2">Svar 2:</label>
-    <input type="text" id="svar2" name="svar2" required>
-    <input type="radio" id="riktig2" name="riktig_svar" value="2" required>
-    <label for="riktig2">Riktig svar</label><br>
-    <label for="svar3">Svar 3:</label>
-    <input type="text" id="svar3" name="svar3" required>
-    <input type="radio" id="riktig3" name="riktig_svar" value="3" required>
-    <label for="riktig3">Riktig svar</label><br>
-    <label for="svar4">Svar 4:</label>
-    <input type="text" id="svar4" name="svar4" required>
-    <input type="radio" id="riktig4" name="riktig_svar" value="4" required>
-    <label for="riktig4">Riktig svar</label><br><br>
-    <input type="submit" value="Legg til spørsmål i {{quiz.navn}}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" id="quiz_id" name="quiz_id" value="{{ quiz.id_quiz }}">
+  <input type="hidden" id="sporsmal_nummer" name="sporsmal_nummer" value="{{ quiz.get_antall_sporsmal() + 1}}">
+  <label for="sporsmal_tema">Tema:</label>
+  <select id="sporsmal_tema" name="sporsmal_tema" required>
+    <option value="" disabled selected>Velg tema</option>
+    {% for tema in temaer %}
+    <option value="{{ tema.id }}">{{ tema.navn }}</option>
+    {% endfor %}
+  </select>
+  <label for="sporsmal_text">Spørsmål:</label>
+  <input type="text" id="sporsmal_tekst" name="sporsmal_tekst"><br><br>
+  <div id="flervalg_svar_{{ quiz.id_quiz }}" style="display:block;">
+    <label for="svar1_{{ quiz.id_quiz }}">Svar 1:</label>
+    <input type="text" id="svar1_{{ quiz.id_quiz }}" name="svar1"><br><br>
+    <label for="svar2_{{ quiz.id_quiz }}">Svar 2:</label>
+    <input type="text" id="svar2_{{ quiz.id_quiz }}" name="svar2"><br><br>
+    <label for="svar3_{{ quiz.id_quiz }}">Svar 3:</label>
+    <input type="text" id="svar3_{{ quiz.id_quiz }}" name="svar3"><br><br>
+    <label for="svar4_{{ quiz.id_quiz }}">Svar 4:</label>
+    <input type="text" id="svar4_{{ quiz.id_quiz }}" name="svar4"><br><br>
+  </div>
+  <input type="hidden" name="sporsmal_type" id="sporsmal_type" value="flervalg">
+  <input type="button" value="Spørsmålstype (Essay eller Flervalg)" onclick="toggleSporsmalType('{{ quiz.id_quiz }}')">
+  <input type="submit" value="Legg til spørsmål i {{quiz.navn}}">
 </form>
 {% if quiz.sporsmal %}
 <h3>Spørsmål:</h3>
@@ -61,42 +75,53 @@
   {% for sporsmal in quiz.sporsmal %}
   <li>
     {{ sporsmal.tekst }}
+    {% if sporsmal.sporsmalstype == 1 %}
     <ul>
       {% for svar in sporsmal.svar %}
-      <li {% if svar.is_riktig %}style="color:green; font-weight:bold;"{% endif %}>{{ svar.tekst }}</li>
+      <li>{{ svar.tekst }}</li>
       {% endfor %}
     </ul>
-    <form action="/quiz/sporsmal/delete/{{sporsmal.id_sporsmal}}" method="POST">
-      <input type="hidden" id="quiz_id" name="quiz_id" value="{{ quiz.id_quiz }}">
-      <input type="hidden" id="sporsmal_id" name="sporsmal_id" value="{{ sporsmal.id_sporsmal }}">
+    {% endif %}
+    <form action="/quiz/sporsmal/delete/{{sporsmal.id_quiz}}/{{sporsmal.id_sporsmal}}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="quiz_id" value="{{ quiz.id_quiz }}">
+      <input type="hidden" name="sporsmal_id" value="{{ sporsmal.id_sporsmal }}">
       <input type="submit" value="Slett dette spørsmålet">
     </form>
-    <button onclick="toggleEditForm('{{ sporsmal.id_sporsmal }}')">Rediger</button>
-    <div id="editForm{{ sporsmal.id_sporsmal }}" style="display:none;">
+    <button onclick="toggleEditForm('{{ quiz.id_quiz }}', '{{ sporsmal.id_sporsmal }}')">Rediger</button>
+    <div id="editForm{{ quiz.id_quiz }}_{{ sporsmal.id_sporsmal }}" style="display:none;">
       <form action="/quiz/sporsmal/edit/{{ sporsmal.id_sporsmal }}" method="POST">
-        <input type="hidden" id="quiz_id" name="quiz_id" value="{{ quiz.id_quiz }}">
-        <input type="text" id="sporsmal_tekst" name="sporsmal_tekst" value="{{ sporsmal.tekst }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="quiz_id" value="{{ quiz.id_quiz }}">
+        <input type="text" name="sporsmal_tekst" value="{{ sporsmal.tekst }}">
         <ul>
           {% for svar in sporsmal.svar %}
           <li>
-            <input type="hidden" id="svar_id" name="svar_id" value="{{ svar.id_svar }}">
-            <input type="text" id="svar_tekst" name="svar_tekst" value="{{ svar.tekst }}">
-            <input type="radio" id="is_riktig_{{ svar.id_svar }}" name="riktig_svar" value="{{ svar.id_svar }}" {% if svar.is_riktig %}checked{% endif %}>
-            <label for="is_riktig_{{ svar.id_svar }}">Riktig svar</label>
+            <input type="hidden" name="svar_id[]" value="{{ svar.id_svar }}">
+            <input type="text" name="svar_tekst[]" value="{{ svar.tekst }}">
           </li>
           {% endfor %}
         </ul>
+        <select name="sporsmal_tema" required>
+          <option value="" disabled>Velg tema</option>
+          {% for tema in temaer %}
+          {% if tema.id == sporsmal.id_tema %}
+          <option value="{{ tema.id }}" selected>{{ tema.navn }}</option>
+          {% else %}
+          <option value="{{ tema.id }}">{{ tema.navn }}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
         <input type="submit" value="Lagre endringer">
       </form>
     </div>
   </li>
   {% endfor %}
 </ul>
-{% endif %}
-
 <script>
-  function toggleEditForm(sporsmalId) {
-    var form = document.getElementById('editForm' + sporsmalId);
+  function toggleEditForm(quizId, sporsmalId) {
+    var formId = 'editForm' + quizId + '_' + sporsmalId;
+    var form = document.getElementById(formId);
     if (form.style.display === 'none') {
       form.style.display = 'block';
     } else {
@@ -104,7 +129,23 @@
     }
   }
 </script>
-
+{% endif %}
 {% endfor %}
 {% endif %}
+
+<script>
+  function toggleSporsmalType(quizId) {
+    var flervalgSvar = document.getElementById('flervalg_svar_' + quizId);
+    var sporsmalTypeInput = document.getElementById('sporsmal_type');
+
+    if (flervalgSvar.style.display === 'none') {
+      flervalgSvar.style.display = 'block';
+      sporsmalTypeInput.value = 'flervalg';
+    } else {
+      flervalgSvar.style.display = 'none';
+      sporsmalTypeInput.value = 'essay';
+    }
+  }
+</script>
+
 {% endblock %}

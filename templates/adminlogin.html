@@ -1,13 +1,16 @@
 {% extends "adminbase.html" %}
 
 {% block content %}
-  <h1>Admin Login</h1>
-  <form method="POST" action="{{ url_for('admin_login') }}">
-    <div class="form-group">
-      <label for="admin_id">AdminId: </label>
-      <input type="text" class="form-control" id="admin_id" name="admin_id" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Login</button>
-  </form>
-  Ikke registrert? <a href="adminregistrering">Registrer deg nå!</a>
+<h1>Admin Login</h1>
+<form method="POST" action="{{ url_for('admin_login') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="form-group">
+    <label for="admin_id">Brukernavn: </label>
+    <input type="text" class="form-control" id="admin_id" name="admin_id" required><br><br>
+    <label for="password">Passord: </label>
+    <input type="password" class="form-control" id="password" name="password" required>
+  </div>
+  <button type="submit" class="btn btn-primary">Login</button>
+</form>
+Ikke registrert? <a href="adminregistrering">Registrer deg nå!</a>
 {% endblock %}

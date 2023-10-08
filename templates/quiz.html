@@ -1,22 +1,72 @@
 {% extends "brukerbase.html" %}
 
 {% block content %}
-<form class="quiz" method="post">
+<form class="quiz" method="post" id="quiz-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <h1>{{ quiz.navn }}</h1>
     <p>Antall spørsmål: {{ quiz.get_antall_sporsmal() }}</p>
     <hr>
-    {% for sporsmal in quiz.sporsmal %}
-        <h3>{{ sporsmal.tekst }}</h3>
-        <ul>
-            {% for svar in sporsmal.svar %}
-                    <label>
-                        <input type="radio" name="sporsmal{{ sporsmal.id_sporsmal }}" value="{{ svar.id_svar }}">
-                        {{ svar.tekst }}
-                    </label>
-                    <p></p>
-            {% endfor %}
-        </ul>
-    {% endfor %}
-    <button type="submit">Svar</button>
+    <div class="sporsmal-container">
+        {% for sporsmal in quiz.sporsmal %}
+        <div class="sporsmal" id="sporsmal{{ loop.index }}">
+            <h3>{{ sporsmal.tekst }}</h3>
+            <ul>
+                {% if sporsmal.sporsmalstype == 1 %}
+                {% for svar in sporsmal.svar %}
+                <label>
+                    <input type="radio" name="sporsmal{{ sporsmal.id_sporsmal }}" value="{{ svar.id_svar }}">
+                    {{ svar.tekst }}
+                </label>
+                <p></p>
+                {% endfor %}
+                {% endif %}
+                {% if sporsmal.sporsmalstype == 2 %}
+                <label>
+                    <textarea type="textarea" name="sporsmal{{ sporsmal.id_sporsmal }}" rows="4" cols="50"></textarea>
+                </label>
+                {% endif %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+    <button type="button" id="ga-videre">Gå videre</button>
+    <button type="submit" id="lever" style="display: none;">Lever</button>
 </form>
+
+<script>
+    var currentSporsmal = 1;
+    var totalSporsmal = {{ quiz.get_antall_sporsmal() }};
+    var sporsmalContainer = document.getElementsByClassName('sporsmal-container')[0];
+    var sporsmalList = sporsmalContainer.getElementsByClassName('sporsmal');
+    var gaVidereButton = document.getElementById('ga-videre');
+    var leverButton = document.getElementById('lever');
+    var quizForm = document.getElementById('quiz-form');
+
+    function visNesteSporsmal() {
+        // Validerer om brukeren har angitt et svar før du går videre
+        var svarInput = quizForm.elements['sporsmal' + currentSporsmal];
+        if (svarInput.value === '' || (svarInput.type === 'radio' && !svarInput.checked)) {
+            alert('Vennligst angi et svar før du går videre.');
+            return;
+        }
+
+        if (currentSporsmal < totalSporsmal) {
+            sporsmalList[currentSporsmal - 1].style.display = 'none';
+            currentSporsmal++;
+            sporsmalList[currentSporsmal - 1].style.display = 'block';
+        }
+
+        if (currentSporsmal === totalSporsmal) {
+            gaVidereButton.style.display = 'none';
+            leverButton.style.display = 'block';
+        }
+    }
+
+    // Skjul alle spørsmål bortsett fra det første
+    for (var i = 1; i < totalSporsmal; i++) {
+        sporsmalList[i].style.display = 'none';
+    }
+
+    gaVidereButton.addEventListener('click', visNesteSporsmal);
+</script>
 {% endblock %}

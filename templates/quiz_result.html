@@ -1,11 +1,10 @@
 {% extends "brukerbase.html" %}
 
 {% block content %}
-  <div class="container">
-    <h1>Quiz Resultat: {{ quiz.navn }}</h1>
-    <p>Du fikk {{poeng}} av {{quiz.get_antall_sporsmal()}}</p>
-    <hr>
-    <hr>
-    <a href="{{ url_for('quiz', quiz_id=quiz.id_quiz) }}">Gjenta quizzen</a>
-  </div>
+<div class="container">
+  <h1>Quiz Resultat: {{ quiz.navn }}</h1>
+  <hr>
+  <hr>
+  <a href="{{ url_for('quiz', quiz_id=quiz.id_quiz) }}">Gjenta quizzen</a>
+</div>
 {% endblock %}

@@ -1,13 +1,14 @@
 {% extends "brukerbase.html" %}
 
 {% block content %}
-  <h1>Bruker Login</h1>
-  <form method="POST" action="{{ url_for('bruker_login') }}">
-    <div class="form-group">
-      <label for="bruker_id">BrukerId: </label>
-      <input type="text" class="form-control" id="bruker_id" name="bruker_id" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Login</button>
-  </form>
-  Ikke registrert? <a href="/brukerregistrering">Registrer deg nå!</a>
+<h1>Bruker Login</h1>
+<form method="POST" action="{{ url_for('bruker_login') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="form-group">
+    <label for="bruker_id">BrukerId: </label>
+    <input type="text" class="form-control" id="bruker_id" name="bruker_id" required>
+  </div>
+  <button type="submit" class="btn btn-primary">Login</button>
+</form>
+Ikke registrert? <a href="/brukerregistrering">Registrer deg nå!</a>
 {% endblock %}
